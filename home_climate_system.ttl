@@ -1,0 +1,57 @@
+@prefix brick: <https://brickschema.org/schema/1.1.0/Brick#> .
+@prefix device: <http://hulite.com/device#> .
+@prefix device_feature: <http://hulite.com/device_feature#> .
+@prefix environment: <http://hulite.com/environment#> .
+@prefix environment_feature: <http://hulite.com/environment_feature#> .
+@prefix house: <http://hulite.com/house#> .
+@prefix house_feature: <http://hulite.com/house_feature#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hulite.com/device#/humSensor> device_feature:id "sensor/humSensor" ;
+    rdfs:subClassOf device:sensor .
+
+<http://hulite.com/device#/lightSensor> device_feature:id "sensor/lightSensor" ;
+    rdfs:subClassOf device:sensor .
+
+<http://hulite.com/device#/tempSensor> device_feature:id "sensor/tempSensor" ;
+    rdfs:subClassOf device:sensor .
+
+<http://hulite.com/house#/room> device_feature:contains <http://hulite.com/device#/lopy4>,
+        <http://hulite.com/device#/pysense> ;
+    house_feature:consists <http://hulite.com/environment#/air> ;
+    rdfs:subClassOf <http://hulite.com/house#/home> .
+
+<http://hulite.com/device#/database> device_feature:id "firebase" ;
+    device_feature:inConnection <http://hulite.com/device#/mobileApp> .
+
+<http://hulite.com/device#/lopy4> device_feature:id "board" ;
+    device_feature:inConnection <http://hulite.com/device#/pysense>,
+        <http://hulite.com/device#/webServer> .
+
+<http://hulite.com/device#/mobileApp> device_feature:id "ionic" .
+
+<http://hulite.com/device#/webServer> device_feature:id "amazon" ;
+    device_feature:inConnection <http://hulite.com/device#/database> .
+
+<http://hulite.com/environment#/humidity> environment_feature:unit "%" .
+
+<http://hulite.com/environment#/light> environment_feature:unit "lux" .
+
+<http://hulite.com/environment#/temperature> environment_feature:unit "°C" .
+
+<http://hulite.com/house#/home> a brick:Building .
+
+<http://hulite.com/device#/pysense> device_feature:has device:sensor ;
+    device_feature:id "sensorShield" .
+
+<http://hulite.com/environment#/air> a brick:Air ;
+    environment_feature:contains <http://hulite.com/environment#/light> ;
+    environment_feature:has <http://hulite.com/environment#/humidity>,
+        <http://hulite.com/environment#/temperature> .
+
+device:sensor device_feature:sense <http://hulite.com/environment#/air> .
+
