@@ -6,7 +6,7 @@ var/home_climate_system.ttl - The generated TURTLE file.
 
 Requirements:
 
-python3 for the interpreter
+python3 for the interpreter;
 python3-rdflib for RDF support
 
 Executin:
