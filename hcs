@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+
+from wrapping import *
+
+TTL_FILENAME = '../var/home_climate_system.ttl'
+
+g = model()
+
+###############################################################################
+################################################################# home ########
+
+home = HOUSE['/home']
+g.add((home, RDF.type, BRICK['Building']))
+
+###############################################################################
+################################################################# air #########
+
+roomAir = ENVIRONMENT['/air']
+g.add((roomAir, RDF.type, BRICK['Air']))
+
+###############################################################################
+################################################################# room ########
+
+room = HOUSE['/room']
+g.add((room, RDFS.subClassOf, home))
+g.add((room, HOUSE_FEATURE.consists, roomAir))
+
+###############################################################################
+################################################################# device ######
+
+lopy4 = DEVICE['/lopy4']
+g.add((lopy4, DEVICE_FEATURE.id, Literal('board')))
+g.add((room, DEVICE_FEATURE.contains, lopy4))
+
+pysense = DEVICE['/pysense']
+g.add((pysense, DEVICE_FEATURE.id, Literal('sensorShield')))
+g.add((room, DEVICE_FEATURE.contains, pysense))
+
+g.add((lopy4, DEVICE_FEATURE.inConnection, pysense))
+
+webServer = DEVICE['/webServer']
+g.add((webServer, DEVICE_FEATURE.id, Literal('amazon')))
+g.add((lopy4, DEVICE_FEATURE.inConnection, webServer))
+
+database = DEVICE['/database']
+g.add((database, DEVICE_FEATURE.id, Literal('firebase')))
+g.add((webServer, DEVICE_FEATURE.inConnection, database))
+
+mobileApp = DEVICE['/mobileApp']
+g.add((mobileApp, DEVICE_FEATURE.id, Literal('ionic')))
+g.add((database, DEVICE_FEATURE.inConnection, mobileApp))
+
+###############################################################################
+##############################################################  sensor ########
+
+sensor = DEVICE['sensor']
+g.add((pysense, DEVICE_FEATURE.has, sensor))
+
+tempSensor = DEVICE['/tempSensor']
+g.add((tempSensor, DEVICE_FEATURE.id, Literal('sensor/tempSensor')))
+g.add((tempSensor, RDFS.subClassOf, sensor))
+
+humSensor = DEVICE['/humSensor']
+g.add((humSensor, DEVICE_FEATURE.id, Literal('sensor/humSensor')))
+g.add((humSensor, RDFS.subClassOf, sensor))
+
+lightSensor = DEVICE['/lightSensor']
+g.add((lightSensor, DEVICE_FEATURE.id, Literal('sensor/lightSensor')))
+g.add((lightSensor, RDFS.subClassOf, sensor))
+
+g.add((sensor, DEVICE_FEATURE.sense, roomAir))
+
+###############################################################################
+############################################## environmental variables ########
+
+temperature = ENVIRONMENT['/temperature']
+g.add((roomAir, ENVIRONMENT_FEATURE.has, temperature))
+
+humidity = ENVIRONMENT['/humidity']
+g.add((roomAir, ENVIRONMENT_FEATURE.has, humidity))
+
+light = ENVIRONMENT['/light']
+g.add((roomAir, ENVIRONMENT_FEATURE.contains, light))
+
+###############################################################################
+################################################################# unit ########
+
+g.add((temperature, ENVIRONMENT_FEATURE.unit, Literal("°C")))
+
+g.add((humidity, ENVIRONMENT_FEATURE.unit, Literal("%")))
+
+g.add((light, ENVIRONMENT_FEATURE.unit, Literal("lux")))
+
+###############################################################################
+########################## store-load cycle to simulate applications split ####
+
+g.serialize(TTL_FILENAME, 'turtle')
+del g
+g = Graph()
+g.parse(TTL_FILENAME, format='turtle')
+
+###############################################################################
+########################################################### dashbard query ####
+
+q_tempSensor = \
+'''
+SELECT ?resource
+WHERE {
+    ?resource device_feature:id 'sensor/tempSensor'
+}
+'''
+pprint(query(g, q_tempSensor))
+
+q_sensorIds = \
+'''
+SELECT ?resource ?id
+WHERE {
+    ?resource rdfs:subClassOf device:sensor .
+    ?resource device_feature:id ?id
+}
+'''
+pprint(query(g, q_sensorIds))
