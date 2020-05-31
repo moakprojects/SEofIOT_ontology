@@ -9,6 +9,6 @@ Requirements:
 python3 for the interpreter;
 python3-rdflib for RDF support
 
-Executin:
+Execution:
 
 cd src; ./hcs
